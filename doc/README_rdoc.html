@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=US-ASCII" http-equiv="Content-Type" />
+
+  <title>File: README.rdoc [RDoc Documentation]</title>
+
+  <link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet" />
+
+  <script src="./js/jquery.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="./js/thickbox-compressed.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="./js/quicksearch.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="./js/darkfish.js" type="text/javascript"
+    charset="utf-8"></script>
+</head>
+
+<body class="file">
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="./index.html">Home</a>
+          <a href="./index.html#classes">Classes</a>
+          <a href="./index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="./README_rdoc.html">README.rdoc</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class Index
+          <span class="search-toggle"><img src="./images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="./RoogleGraphics.html">RoogleGraphics</a></li>
+        
+          <li><a href="./RoogleGraphics/Plot.html">RoogleGraphics::Plot</a></li>
+        
+          <li><a href="./RoogleGraphics/Shape.html">RoogleGraphics::Shape</a></li>
+        
+          <li><a href="./RoogleGraphics/Text.html">RoogleGraphics::Text</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    
+<h1>roogle_graphics</h1>
+
+<p>A Ruby module to generate simple graphics using Google's online plotting
+service.</p>
+
+<h2>Introduction</h2>
+
+<p>roogle_graphics is a Ruby module that makes it very easy to generate simple
+PNG images containing text and polygons.  It does this by compiling your
+graphic commands into a URI and sending it to the Google Chart online
+service for rendering.</p>
+
+<p>The main advantage of this approach is that it requires <b>no external
+libraries or packages</b>.  It will work from any environment that can
+issue an HTML GET request.</p>
+
+<p>The main disadvantage is that we're asking the Google Chart API to do
+something it really wasn't designed to do, so you don't have total control
+over things like font style.  But even so, roogle_graphics can generate
+useful and good looking graphics, like this:</p>
+
+<p><img src="../images/gas_usage.png" /></p>
+
+<h2>simple example</h2>
+
+<p>To use roogle_graphics, the basic steps are:</p>
+<ul><li>
+<p>Instantiate a Plot object</p>
+</li><li>
+<p>Create Text and Shape elements, calling Plot#add_element() on each one to
+add it to the plot.</p>
+</li><li>
+<p>Call Plot#generate_uri (or Plot#generate_img_uri) and submit the resulting
+string to the Google Chart web service.</p>
+</li><li>
+<p>Display the resulting .png</p>
+</li></ul>
+
+<p>For example:</p>
+
+<pre>require 'roogle_graphics'
+include RoogleGraphics
+
+def hello_world
+  plot_width = 300
+  plot_height = 300
+  x0 = plot_width/2
+  y0 = plot_height/2
+
+  # set up a plot with a lemony gradient background
+  plot = Plot.new(:width =&gt; plot_width, :height =&gt; plot_height, :fill_color2 =&gt; 'ffffcc')
+
+  # add a pale blue box, centered at the middle of the plot
+  box = [[-130,-130],[130,-130],[130,130],[-130,130],[-130,-130]]
+  shape = Shape.new(x0, y0, box, :fill_color =&gt; 'ccccff')
+  plot.add_element(shape)
+
+  # add text with cheap embossed effect
+  msg = &quot;hello, world!&quot;
+  text = Text.new(x0+2, y0-2, msg, :color =&gt; 'ffffff', :size =&gt; 40, :halign =&gt; :center, :valign =&gt; :middle)
+  plot.add_element(text)
+  text = Text.new(x0, y0, msg, :size =&gt; 40, :halign =&gt; :center, :valign =&gt; :middle)
+  plot.add_element(text)
+
+  # generate the URI that, when passed to Google, will produce the plot
+  plot.generate_uri
+end</pre>
+
+<p>This generates the rather fearsome URI of:</p>
+
+<pre>http://chart.apis.google.com/chart?cht=lxy&amp;chs=300x300&amp;chxt=x,y&amp;chxs=0,000000,0,0,_|1,000000,0,0,_&amp;chco=ffffff00&amp;chd=t:6.7,93.3,93.3,6.7,6.7|6.7,6.7,93.3,93.3,6.7&amp;chm=B,ccccff,0,0,0|@thello%5C%2C+world%21,ffffff,0,0.493:0.493,40,0,hv|@thello%5C%2C+world%21,000000,0,0.500:0.500,40,0,hv&amp;chf=bg,lg,0,ffffff,0,ffffcc,1</pre>
+
+<p>which, passed to Google's charting service will produce a png file that
+looks like this:</p>
+
+<p><img src="../images/hello_world.png" /></p>
+
+<p>See <a
+href="../roogle_graphic_examples.rb">../roogle_graphic_examples.rb</a> for
+additional examples.</p>
+
+<h2>Notes (and limitations)</h2>
+
+<p>We are severely subverting Googles's graphing services API when we use it
+to plot simple polygons and shapes -- it was originally designed to make
+good looking quantitative graphs (a job it does very well).  So it is not
+surprising that there are several limitations:</p>
+<ul><li>
+<p>URLs are limited to 2K in length.  If your plot gets too complicated,</p>
+</li></ul>
+
+<p>consider using a POST as described in <a
+href="http://code.google.com/apis/chart/docs/post_requests.html">code.google.com/apis/chart/docs/post_requests.html</a>
+(TODO:  write a Plot#generate_form method that outputs a POSTable form.)</p>
+<ul><li>
+<p>You cannot control the font, or font weight.</p>
+</li><li>
+<p>You cannot control the weight of a Shape's outline.</p>
+</li><li>
+<p>Be nice to Google.  Don't try to generate real-time animations using
+roogle_graphics.</p>
+</li><li>
+<p>For more information, see <a
+href="http://code.google.com/apis/chart/docs/making_charts.html">code.google.com/apis/chart/docs/making_charts.html</a></p>
+</li><li>
+<p>Want to know how this really works?  See <a
+href="http://code.google.com/apis/chart/docs/chart_params.html">code.google.com/apis/chart/docs/chart_params.html</a></p>
+</li></ul>
+
+<h2>Want to help?</h2>
+
+<p>You know the drill: fork the repository, work your magic, let me know when
+I should merge yours back in.</p>
+
+<p>Share and enjoy!</p>
+
+  </div>
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+</body>
+</html>
+
