@@ -1,4 +1,4 @@
-# roogle_graphics is a Ruby module that renders simple text and shapes
+# roogle_graphics is a Ruby module that renders simple text and polygons
 # into .png graphics by calling the Google Chart web service.
 #
 # Note: roogle_graphics largely subverts the Google Chart API's
@@ -28,18 +28,18 @@ module RoogleGraphics
   end
 
   # ================================================================
-  # A Shape element defines a closed polygon to be rendered.
-  class Shape < GraphicElement
+  # A Polygon element defines a closed polygon to be rendered.
+  class Polygon < GraphicElement
     attr_reader :points, :outline_color, :fill_color
 
-    # Define a new shape, to be rendered at +origin_x+, +origin_y+.  
+    # Define a new polygon, to be rendered at +origin_x+, +origin_y+.  
     # +points+ is an array of x,y pairs, where each xy pair is an 
     # offset from +origin_x+, +origin_y+, as in:
     #   [[x0,y0],[x1,y1],[x2,y2], ...[x0,y0]].
     #
     # Recognized options:
-    # +outline_color+:: the color of the shape's outline, as a six-character hex string.  Default is nil (no outline).
-    # +fill_color+:: the fill color for the shape as a six-character hex string.  Default is nil (no fill).
+    # +outline_color+:: the color of the polygon's outline, as a six-character hex string.  Default is nil (no outline).
+    # +fill_color+:: the fill color for the polygon as a six-character hex string.  Default is nil (no fill).
     # 
     def initialize(origin_x, origin_y, points, opts = {})
       super(origin_x, origin_y)
@@ -89,7 +89,7 @@ module RoogleGraphics
     attr_reader :width, :height, :fill_color1, :fill_color2, :angle
     attr_accessor :elements
 
-    # Create a new, empty Plot object to which you can add Text and Shape elements.
+    # Create a new, empty Plot object to which you can add Text and Polygon elements.
     # Recognized options are:
     # +:width+:: width of the plot in pixels (default: 300)
     # +:height+:: height of the plot in pixels (default: 300)
@@ -106,7 +106,7 @@ module RoogleGraphics
       @angle = opts[:angle] || 0
     end
 
-    # Push a new graphic element (Text or Shape) on to the display
+    # Push a new graphic element (Text or Polygon) on to the display
     # list.  In general, elements are drawn in the order they are
     # added, so the last element to be added is always drawn on top.
     def add_element(element)
@@ -147,30 +147,30 @@ module RoogleGraphics
     end
     
     def generate_line_colors
-      outline_colors = shape_elements.map {|s| s.outline_color}
+      outline_colors = polygon_elements.map {|s| s.outline_color}
       if (outline_colors.all? {|c| c.nil?})
         "chco=ffffff00"                # use transparent outlines
-      elsif (outline_colors[1,outline_colors.size-1].all? {|c| c=outline_colors.first})
-        "chco=#{outline_colors.first}" # all shape elements have the same color
+      elsif (outline_colors[1,outline_colors.size-1].all? {|c| c == outline_colors.first})
+        "chco=#{outline_colors.first}" # all polygon elements have the same color
       else
         "chco=" + outline_colors.join('|')
       end
     end
     
     def generate_lines
-      shape_coords = shape_elements.map {|s| generate_shape(s)}.compact.join('|')
-      "chd=t:" + ((shape_coords.empty?) ? "0|0" : shape_coords)
+      polygon_coords = polygon_elements.map {|s| generate_polygon(s)}.compact.join('|')
+      "chd=t:" + ((polygon_coords.empty?) ? "0|0" : polygon_coords)
     end
     
     def generate_markers
-      s = shape_elements.map {|s| s.fill_color}.zip(0..shape_elements.size).map {|c,i| "B,#{c},#{i},0,0"}
+      s = polygon_elements.map {|s| s.fill_color}.zip(0..polygon_elements.size).map {|c,i| "B,#{c},#{i},0,0"}
       t = text_elements.map {|t| "@t#{escape(t.text)},#{t.color},0,#{p2r_x(t.origin_x)}:#{p2r_y(t.origin_y)},#{t.size},0,#{t.alignment}"}
       "chm=" + [*s, *t].compact.join('|')
     end
     
-    def generate_shape(shape)
-      x_points = shape.points.map {|px, py| p2c_x(px + shape.origin_x)}
-      y_points = shape.points.map {|px, py| p2c_y(py + shape.origin_y)}
+    def generate_polygon(polygon)
+      x_points = polygon.points.map {|px, py| p2c_x(px + polygon.origin_x)}
+      y_points = polygon.points.map {|px, py| p2c_y(py + polygon.origin_y)}
       x_points.join(',')+'|'+y_points.join(',')
     end
     
@@ -184,8 +184,8 @@ module RoogleGraphics
     
     # ================
 
-    def shape_elements
-      self.elements.select {|e| e.kind_of?(Shape)}
+    def polygon_elements
+      self.elements.select {|e| e.kind_of?(Polygon)}
     end
 
     def text_elements

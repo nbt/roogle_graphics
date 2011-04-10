@@ -10,8 +10,8 @@ module RoogleGraphicsExamples # :nodoc:
     plot = Plot.new(:width => plot_width, :height => plot_height, :fill_color2 => 'ffffcc')
     
     # add a pale blue box, centered at the middle of the plot
-    shape = Shape.new(plot_width/2, plot_height/2, [[-130,-130],[130,-130],[130,130],[-130,130],[-130,-130]], :fill_color => 'ccccff')
-    plot.add_element(shape)
+    polygon = Polygon.new(plot_width/2, plot_height/2, [[-130,-130],[130,-130],[130,130],[-130,130],[-130,-130]], :fill_color => 'ccccff')
+    plot.add_element(polygon)
     
     # add text with cheap embossed effect
     text = Text.new((plot_width/2)-2, (plot_height/2)-2, "hello, world!", :color => 'ffffff', :size => 40, :halign => :center, :valign => :middle)
@@ -34,10 +34,10 @@ module RoogleGraphicsExamples # :nodoc:
     # Add some familiar text, centered at the middle of the plot
     plot.add_element(Text.new(x0, y0, "hello, world!", :size => 30, :halign => :center, :valign => :middle))
     
-    # define a diamond shape
+    # define a diamond polygon
     diamond_width = 40
     diamond_height = 60
-    diamond_shape = [[0.0, -diamond_height/2], 
+    diamond_polygon = [[0.0, -diamond_height/2], 
                      [diamond_width/2, 0.0], 
                      [0.0, diamond_height/2], 
                      [-diamond_width/2, 0.0], 
@@ -51,7 +51,7 @@ module RoogleGraphicsExamples # :nodoc:
       color = sprintf("%02x%02x%02x", 255, i*51, i*51)
       x = x0 + r * Math.sin(i * i_to_r)
       y = y0 + r * Math.cos(i * i_to_r)
-      plot.add_element(Shape.new(x, y, diamond_shape, :outline_color => '000000', :fill_color => color))
+      plot.add_element(Polygon.new(x, y, diamond_polygon, :outline_color => '000000', :fill_color => color))
     end
     
     # Generate the URI that will produce the plot
